@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h2>Patients Management</h2>
+        <button class="btn btn-primary" onclick="showAddForm()">Add Patient</button>
+    </div>
+
+    <!-- Add/Edit Form -->
+    <div id="patientForm" class="form-container" style="display: none;">
+        <h3 id="formTitle">Add Patient</h3>
+        <form id="patForm">
+            <input type="hidden" id="patientId">
+            <div class="form-group">
+                <label for="patientName">Patient Name:</label>
+                <input type="text" id="patientName" required>
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" min="1" max="120" required>
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea id="address" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Patients Table -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.patient_id }}</td>
+                    <td>{{ patient.patient_name }}</td>
+                    <td>{{ patient.age }}</td>
+                    <td>{{ patient.gender }}</td>
+                    <td>{{ patient.phone }}</td>
+                    <td>{{ patient.address or 'N/A' }}</td>
+                    <td>{{ patient.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="editPatient({{ patient.patient_id }}, '{{ patient.patient_name }}', {{ patient.age }}, '{{ patient.gender }}', '{{ patient.phone }}', '{{ patient.address or '' }}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePatient({{ patient.patient_id }})">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+let isEditing = false;
+
+function showAddForm() {
+    document.getElementById('patientForm').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Add Patient';
+    document.getElementById('patForm').reset();
+    document.getElementById('patientId').value = '';
+    isEditing = false;
+}
+
+function hideForm() {
+    document.getElementById('patientForm').style.display = 'none';
+}
+
+function editPatient(id, name, age, gender, phone, address) {
+    document.getElementById('patientForm').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Edit Patient';
+    document.getElementById('patientId').value = id;
+    document.getElementById('patientName').value = name;
+    document.getElementById('age').value = age;
+    document.getElementById('gender').value = gender;
+    document.getElementById('phone').value = phone;
+    document.getElementById('address').value = address;
+    isEditing = true;
+}
+
+document.getElementById('patForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const data = {
+        patient_name: document.getElementById('patientName').value,
+        age: parseInt(document.getElementById('age').value),
+        gender: document.getElementById('gender').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value
+    };
+    
+    console.log('Sending patient data:', data);
+    
+    const url = isEditing ? `/api/patients/${document.getElementById('patientId').value}` : '/api/patients';
+    const method = isEditing ? 'PUT' : 'POST';
+    
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        console.log('Response:', result);
+        
+        if (result.success) {
+            alert('Patient saved successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
+    }
+});
+
+async function deletePatient(id) {
+    if (confirm('Are you sure you want to delete this patient?')) {
+        try {
+            const response = await fetch(`/api/patients/${id}`, {method: 'DELETE'});
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error deleting patient');
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+}
+</script>
+{% endblock %}

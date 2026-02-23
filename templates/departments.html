@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h2>Departments Management</h2>
+        <button class="btn btn-primary" onclick="showAddForm()">Add Department</button>
+    </div>
+
+    <!-- Add/Edit Form -->
+    <div id="departmentForm" class="form-container" style="display: none;">
+        <h3 id="formTitle">Add Department</h3>
+        <form id="deptForm">
+            <input type="hidden" id="deptId">
+            <div class="form-group">
+                <label for="deptName">Department Name:</label>
+                <input type="text" id="deptName" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Departments Table -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Department Name</th>
+                    <th>Description</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="departmentsTable">
+                {% for dept in departments %}
+                <tr>
+                    <td>{{ dept.dept_id }}</td>
+                    <td>{{ dept.dept_name }}</td>
+                    <td>{{ dept.description or 'N/A' }}</td>
+                    <td>{{ dept.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="editDepartment({{ dept.dept_id }}, '{{ dept.dept_name }}', '{{ dept.description or '' }}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteDepartment({{ dept.dept_id }})">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+let isEditing = false;
+
+function showAddForm() {
+    document.getElementById('departmentForm').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Add Department';
+    document.getElementById('deptForm').reset();
+    document.getElementById('deptId').value = '';
+    isEditing = false;
+}
+
+function hideForm() {
+    document.getElementById('departmentForm').style.display = 'none';
+}
+
+function editDepartment(id, name, description) {
+    document.getElementById('departmentForm').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Edit Department';
+    document.getElementById('deptId').value = id;
+    document.getElementById('deptName').value = name;
+    document.getElementById('description').value = description;
+    isEditing = true;
+}
+
+document.getElementById('deptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const data = {
+        dept_name: document.getElementById('deptName').value,
+        description: document.getElementById('description').value
+    };
+    
+    const url = isEditing ? `/api/departments/${document.getElementById('deptId').value}` : '/api/departments';
+    const method = isEditing ? 'PUT' : 'POST';
+    
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(isEditing ? 'Department updated successfully!' : 'Department added successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
+    }
+});
+
+async function deleteDepartment(id) {
+    if (confirm('Are you sure you want to delete this department?')) {
+        try {
+            const response = await fetch(`/api/departments/${id}`, {method: 'DELETE'});
+            if (response.ok) {
+                location.reload();
+            } else {
+                const result = await response.json();
+                alert('Error: ' + (result.error || 'Cannot delete department'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+}
+</script>
+{% endblock %}

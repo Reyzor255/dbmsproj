@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h2>Reports & Analytics</h2>
+    </div>
+
+    <!-- Department Patient Count Report -->
+    <div class="report-section">
+        <h3>Department-wise Patient Count</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Total Patients</th>
+                        <th>Waiting Patients</th>
+                        <th>Completed Patients</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in dept_report %}
+                    <tr>
+                        <td>{{ row.dept_name }}</td>
+                        <td>{{ row.total_patients }}</td>
+                        <td>{{ row.waiting_patients }}</td>
+                        <td>{{ row.completed_patients }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Doctor Token Count Report -->
+    <div class="report-section">
+        <h3>Doctor-wise Token Count & Performance</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Doctor Name</th>
+                        <th>Department</th>
+                        <th>Total Tokens</th>
+                        <th>Completion Rate (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in doctor_report %}
+                    <tr>
+                        <td>{{ row.doctor_name }}</td>
+                        <td>{{ row.dept_name }}</td>
+                        <td>{{ row.total_tokens }}</td>
+                        <td>{{ "%.1f"|format(row.completion_rate) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Daily Token Summary Report -->
+    <div class="report-section">
+        <h3>Daily Token Generation Summary</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Tokens Generated</th>
+                        <th>Completed Tokens</th>
+                        <th>Pending Tokens</th>
+                        <th>Completion Rate (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in daily_report %}
+                    <tr>
+                        <td>{{ row.token_date }}</td>
+                        <td>{{ row.tokens_generated }}</td>
+                        <td>{{ row.completed_tokens }}</td>
+                        <td>{{ row.pending_tokens }}</td>
+                        <td>
+                            {% if row.tokens_generated > 0 %}
+                                {{ "%.1f"|format((row.completed_tokens / row.tokens_generated) * 100) }}%
+                            {% else %}
+                                0.0%
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <h4>Total Departments</h4>
+            <div class="summary-number">{{ dept_report|length }}</div>
+        </div>
+        
+        <div class="summary-card">
+            <h4>Total Doctors</h4>
+            <div class="summary-number">{{ doctor_report|length }}</div>
+        </div>
+        
+        <div class="summary-card">
+            <h4>Total Tokens Today</h4>
+            <div class="summary-number">
+                {% if daily_report %}
+                    {{ daily_report[0].tokens_generated }}
+                {% else %}
+                    0
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="summary-card">
+            <h4>Pending Tokens</h4>
+            <div class="summary-number">
+                {% if daily_report %}
+                    {{ daily_report[0].pending_tokens }}
+                {% else %}
+                    0
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

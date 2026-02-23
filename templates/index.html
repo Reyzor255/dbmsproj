@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="hero">
+        <h2>Welcome to Hospital Queue Management System</h2>
+        <p>Efficiently manage patient queues, appointments, and hospital operations</p>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="card">
+            <h3>Departments</h3>
+            <p>Manage hospital departments and their information</p>
+            <a href="{{ url_for('departments') }}" class="btn btn-primary">Manage Departments</a>
+        </div>
+
+        <div class="card">
+            <h3>Doctors</h3>
+            <p>Add and manage doctor profiles and specializations</p>
+            <a href="{{ url_for('doctors') }}" class="btn btn-primary">Manage Doctors</a>
+        </div>
+
+        <div class="card">
+            <h3>Patients</h3>
+            <p>Register and manage patient information</p>
+            <a href="{{ url_for('patients') }}" class="btn btn-primary">Manage Patients</a>
+        </div>
+
+        <div class="card">
+            <h3>Queue Tokens</h3>
+            <p>Generate and track appointment tokens</p>
+            <a href="{{ url_for('tokens') }}" class="btn btn-primary">Manage Tokens</a>
+        </div>
+
+        <div class="card">
+            <h3>Reports</h3>
+            <p>View analytics and summary reports</p>
+            <a href="{{ url_for('reports') }}" class="btn btn-primary">View Reports</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

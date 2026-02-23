@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h2>Doctors Management</h2>
+        <button class="btn btn-primary" onclick="showAddForm()">Add Doctor</button>
+    </div>
+
+    <!-- Add/Edit Form -->
+    <div id="doctorForm" class="form-container" style="display: none;">
+        <h3 id="formTitle">Add Doctor</h3>
+        <form id="docForm">
+            <input type="hidden" id="doctorId">
+            <div class="form-group">
+                <label for="doctorName">Doctor Name:</label>
+                <input type="text" id="doctorName" required>
+            </div>
+            <div class="form-group">
+                <label for="specialization">Specialization:</label>
+                <input type="text" id="specialization" required>
+            </div>
+            <div class="form-group">
+                <label for="deptId">Department:</label>
+                <select id="deptId" required>
+                    <option value="">Select Department</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.dept_id }}">{{ dept.dept_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Doctors Table -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Specialization</th>
+                    <th>Department</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctors %}
+                <tr>
+                    <td>{{ doctor.doctor_id }}</td>
+                    <td>{{ doctor.doctor_name }}</td>
+                    <td>{{ doctor.specialization }}</td>
+                    <td>{{ doctor.dept_name }}</td>
+                    <td>{{ doctor.phone }}</td>
+                    <td>{{ doctor.email }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="editDoctor({{ doctor.doctor_id }}, '{{ doctor.doctor_name }}', '{{ doctor.specialization }}', {{ doctor.dept_id }}, '{{ doctor.phone }}', '{{ doctor.email }}')">Edit</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteDoctor({{ doctor.doctor_id }})">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+let isEditing = false;
+
+function showAddForm() {
+    document.getElementById('doctorForm').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Add Doctor';
+    document.getElementById('docForm').reset();
+    document.getElementById('doctorId').value = '';
+    isEditing = false;
+}
+
+function hideForm() {
+    document.getElementById('doctorForm').style.display = 'none';
+}
+
+function editDoctor(id, name, specialization, deptId, phone, email) {
+    document.getElementById('doctorForm').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Edit Doctor';
+    document.getElementById('doctorId').value = id;
+    document.getElementById('doctorName').value = name;
+    document.getElementById('specialization').value = specialization;
+    document.getElementById('deptId').value = deptId;
+    document.getElementById('phone').value = phone;
+    document.getElementById('email').value = email;
+    isEditing = true;
+}
+
+document.getElementById('docForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const data = {
+        doctor_name: document.getElementById('doctorName').value,
+        specialization: document.getElementById('specialization').value,
+        dept_id: document.getElementById('deptId').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value
+    };
+    
+    const url = isEditing ? `/api/doctors/${document.getElementById('doctorId').value}` : '/api/doctors';
+    const method = isEditing ? 'PUT' : 'POST';
+    
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(isEditing ? 'Doctor updated successfully!' : 'Doctor added successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
+    }
+});
+
+async function deleteDoctor(id) {
+    if (confirm('Are you sure you want to delete this doctor?')) {
+        try {
+            const response = await fetch(`/api/doctors/${id}`, {method: 'DELETE'});
+            if (response.ok) {
+                location.reload();
+            } else {
+                const result = await response.json();
+                alert('Error: ' + (result.error || 'Cannot delete doctor'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+}
+</script>
+{% endblock %}
