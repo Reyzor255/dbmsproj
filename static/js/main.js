@@ -71,7 +71,7 @@ function formatDateTimeForInput(dateString) {
 
 // Validate phone number
 function validatePhone(phone) {
-    const phoneRegex = /^\d{10}$/;
+    const phoneRegex = /^\d{10,15}$/;
     return phoneRegex.test(phone.replace(/\D/g, ''));
 }
 
@@ -128,50 +128,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add form validation
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            const requiredFields = this.querySelectorAll('[required]');
-            let isValid = true;
-            
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.style.borderColor = '#dc3545';
-                    isValid = false;
-                } else {
-                    field.style.borderColor = '#e0e0e0';
-                }
-                
-                // Specific validations
-                if (field.type === 'email' && field.value && !validateEmail(field.value)) {
-                    field.style.borderColor = '#dc3545';
-                    isValid = false;
-                }
-                
-                if (field.type === 'tel' && field.value && !validatePhone(field.value)) {
-                    field.style.borderColor = '#dc3545';
-                    isValid = false;
-                }
-            });
-            
-            if (!isValid) {
-                e.preventDefault();
-                showNotification('Please fill in all required fields correctly', 'error');
-            }
-        });
+    // REMOVED FORM VALIDATION - Let page-specific handlers manage forms
     });
-    
-    // Auto-refresh token status every 30 seconds on tokens page
-    if (window.location.pathname === '/tokens') {
-        setInterval(() => {
-            // Only refresh if no forms are visible
-            const visibleForms = document.querySelectorAll('.form-container[style*="block"]');
-            if (visibleForms.length === 0) {
-                location.reload();
-            }
-        }, 30000);
-    }
     
     // Add search functionality to tables
     addTableSearch();

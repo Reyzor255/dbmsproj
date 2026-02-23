@@ -120,6 +120,8 @@ def api_departments():
     return jsonify(departments)
 
 @app.route('/api/departments/<int:dept_id>', methods=['PUT', 'DELETE'])
+@login_required
+@role_required('admin', 'receptionist')
 def api_department(dept_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -140,10 +142,13 @@ def api_department(dept_id):
             return jsonify({'success': True})
         except mysql.connector.Error as e:
             conn.close()
+            if '1451' in str(e):
+                return jsonify({'success': False, 'error': 'Cannot delete department. It has doctors assigned to it. Delete or reassign doctors first.'})
             return jsonify({'success': False, 'error': str(e)})
 
 # Doctors CRUD
 @app.route('/doctors')
+@login_required
 def doctors():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -161,6 +166,8 @@ def doctors():
     return render_template('doctors.html', doctors=doctors, departments=departments)
 
 @app.route('/api/doctors', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'receptionist')
 def api_doctors():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -209,6 +216,8 @@ def api_doctors():
     return jsonify(doctors)
 
 @app.route('/api/doctors/<int:doctor_id>', methods=['PUT', 'DELETE'])
+@login_required
+@role_required('admin', 'receptionist')
 def api_doctor(doctor_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -236,6 +245,7 @@ def api_doctor(doctor_id):
 
 # Patients CRUD
 @app.route('/patients')
+@login_required
 def patients():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -245,6 +255,8 @@ def patients():
     return render_template('patients.html', patients=patients)
 
 @app.route('/api/patients', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'receptionist')
 def api_patients():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -283,6 +295,8 @@ def api_patients():
     return jsonify(patients)
 
 @app.route('/api/patients/<int:patient_id>', methods=['PUT', 'DELETE'])
+@login_required
+@role_required('admin', 'receptionist')
 def api_patient(patient_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -306,6 +320,7 @@ def api_patient(patient_id):
 
 # Queue Tokens CRUD
 @app.route('/tokens')
+@login_required
 def tokens():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -335,6 +350,8 @@ def tokens():
                          doctors=doctors, departments=departments)
 
 @app.route('/api/tokens', methods=['GET', 'POST'])
+@login_required
+@role_required('admin', 'receptionist')
 def api_tokens():
     if request.method == 'POST':
         conn = None
@@ -436,6 +453,8 @@ def api_tokens():
     return jsonify(tokens)
 
 @app.route('/api/tokens/<int:token_id>', methods=['PUT', 'DELETE'])
+@login_required
+@role_required('admin', 'receptionist', 'doctor')
 def api_token(token_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -457,6 +476,7 @@ def api_token(token_id):
 
 # Reports
 @app.route('/reports')
+@login_required
 def reports():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
