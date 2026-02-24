@@ -70,8 +70,12 @@
                     <td>{{ patient.address or 'N/A' }}</td>
                     <td>{{ patient.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>
+                        {% if session.role in ['admin', 'receptionist'] %}
                         <button class="btn btn-sm btn-secondary" onclick="editPatient({{ patient.patient_id }}, '{{ patient.patient_name }}', {{ patient.age }}, '{{ patient.gender }}', '{{ patient.phone }}', '{{ patient.address or '' }}')">Edit</button>
                         <button class="btn btn-sm btn-danger" onclick="deletePatient({{ patient.patient_id }})">Delete</button>
+                        {% else %}
+                        <span>View Only</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

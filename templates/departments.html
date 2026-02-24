@@ -4,7 +4,9 @@
 <div class="container">
     <div class="page-header">
         <h2>Departments Management</h2>
+        {% if session.role == 'admin' %}
         <button class="btn btn-primary" onclick="showAddForm()">Add Department</button>
+        {% endif %}
     </div>
 
     <!-- Add/Edit Form -->
@@ -47,8 +49,12 @@
                     <td>{{ dept.description or 'N/A' }}</td>
                     <td>{{ dept.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
                     <td>
+                        {% if session.role == 'admin' %}
                         <button class="btn btn-sm btn-secondary" onclick="editDepartment({{ dept.dept_id }}, '{{ dept.dept_name }}', '{{ dept.description or '' }}')">Edit</button>
                         <button class="btn btn-sm btn-danger" onclick="deleteDepartment({{ dept.dept_id }})">Delete</button>
+                        {% else %}
+                        <span>View Only</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

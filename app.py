@@ -77,6 +77,9 @@ def index():
 @app.route('/departments')
 @login_required
 def departments():
+    if session.get('role') not in ['admin', 'receptionist']:
+        return "<script>alert('Access Denied: Admin/Receptionist only'); window.location.href='/';</script>"
+    
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM departments ORDER BY dept_id")
@@ -121,7 +124,7 @@ def api_departments():
 
 @app.route('/api/departments/<int:dept_id>', methods=['PUT', 'DELETE'])
 @login_required
-@role_required('admin', 'receptionist')
+@role_required('admin')
 def api_department(dept_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -150,6 +153,9 @@ def api_department(dept_id):
 @app.route('/doctors')
 @login_required
 def doctors():
+    if session.get('role') not in ['admin', 'receptionist']:
+        return "<script>alert('Access Denied: Admin/Receptionist only'); window.location.href='/';</script>"
+    
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
@@ -217,7 +223,7 @@ def api_doctors():
 
 @app.route('/api/doctors/<int:doctor_id>', methods=['PUT', 'DELETE'])
 @login_required
-@role_required('admin', 'receptionist')
+@role_required('admin')
 def api_doctor(doctor_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -247,6 +253,9 @@ def api_doctor(doctor_id):
 @app.route('/patients')
 @login_required
 def patients():
+    if session.get('role') not in ['admin', 'receptionist']:
+        return "<script>alert('Access Denied: Admin/Receptionist only'); window.location.href='/';</script>"
+    
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT * FROM patients ORDER BY patient_id")
@@ -478,6 +487,9 @@ def api_token(token_id):
 @app.route('/reports')
 @login_required
 def reports():
+    if session.get('role') != 'admin':
+        return "<script>alert('Access Denied: Admin only'); window.location.href='/';</script>"
+    
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     

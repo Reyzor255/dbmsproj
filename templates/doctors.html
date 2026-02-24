@@ -4,7 +4,9 @@
 <div class="container">
     <div class="page-header">
         <h2>Doctors Management</h2>
+        {% if session.role == 'admin' %}
         <button class="btn btn-primary" onclick="showAddForm()">Add Doctor</button>
+        {% endif %}
     </div>
 
     <!-- Add/Edit Form -->
@@ -68,8 +70,12 @@
                     <td>{{ doctor.phone }}</td>
                     <td>{{ doctor.email }}</td>
                     <td>
+                        {% if session.role == 'admin' %}
                         <button class="btn btn-sm btn-secondary" onclick="editDoctor({{ doctor.doctor_id }}, '{{ doctor.doctor_name }}', '{{ doctor.specialization }}', {{ doctor.dept_id }}, '{{ doctor.phone }}', '{{ doctor.email }}')">Edit</button>
                         <button class="btn btn-sm btn-danger" onclick="deleteDoctor({{ doctor.doctor_id }})">Delete</button>
+                        {% else %}
+                        <span>View Only</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
